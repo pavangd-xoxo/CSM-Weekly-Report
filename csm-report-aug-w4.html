@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Success Report — Aug W4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  :root{--ink:#14181f;--paper:#f6f4ef;--card:#ffffff;--line:#e3ddd0;--muted:#6b6558;--accent:#1a5e5a;--accent-soft:#e3efec;--pos:#1a7a4a;--neg:#b23a2f;--amber:#b8791e;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;padding:0 0 60px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  header{padding:56px 0 36px;border-bottom:2px solid var(--ink);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(38px,6vw,66px);line-height:.98;letter-spacing:-.02em;margin:14px 0 12px;}
+  .sub{color:var(--muted);font-size:15px;max-width:600px}
+  .period{display:inline-block;margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--ink);color:var(--paper);padding:6px 12px;border-radius:3px;letter-spacing:.04em;}
+
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:38px 0 12px;border-radius:6px;overflow:hidden;}
+  .kpi{background:var(--card);padding:20px 18px}
+  .kpi .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .kpi .val{font-family:'Fraunces',serif;font-weight:600;font-size:29px;letter-spacing:-.01em;margin-top:6px}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .kpi .val.up{color:var(--accent)}
+
+  section{margin-top:52px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:18px}
+  .sec-num{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);font-weight:600}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:26px;letter-spacing:-.01em}
+  .sec-head .hint{font-size:13px;color:var(--muted);margin-left:auto;text-align:right}
+
+  .tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:14px}
+  .tbl th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line);background:#faf8f3;}
+  .tbl td{padding:11px 14px;border-bottom:1px solid var(--line)}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .tbl tr.total td{font-weight:700;background:#faf8f3;border-top:2px solid var(--ink)}
+  .tbl .name{font-weight:600}
+  .pos{color:var(--pos);font-weight:600} .neg{color:var(--neg);font-weight:600}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .col-head{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px}
+  .col-head.g{color:var(--pos)} .col-head.d{color:var(--neg)}
+  .mv{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:10px;position:relative}
+  .mv .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .mv .acct{font-weight:600;font-size:15px}
+  .mv .pct{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px}
+  .mv .amt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+  .mv .cmt{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.45;border-top:1px dashed var(--line);padding-top:8px}
+
+  /* hover summary chip + popover */
+  .sumwrap{position:relative;display:inline-block;margin-top:10px}
+  .sum-chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--accent);background:var(--accent-soft);border:1px solid #cfe4df;border-radius:20px;padding:4px 10px;cursor:help;user-select:none;display:inline-flex;align-items:center;gap:5px}
+  .sum-chip::before{content:"◈";font-size:9px}
+  .pop{position:absolute;left:0;bottom:calc(100% + 10px);width:440px;max-width:min(440px,calc(100vw - 56px));background:var(--card);border:1px solid var(--ink);border-radius:8px;box-shadow:0 18px 44px rgba(20,24,31,.18);padding:16px 18px;z-index:40;opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .16s ease,transform .16s ease,visibility .16s;pointer-events:none;max-height:70vh;overflow:auto}
+  .sumwrap:hover .pop,.sumwrap:focus-within .pop{opacity:1;visibility:visible;transform:translateY(0)}
+  .pop h4{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:14px 0 6px}
+  .pop h4:first-child{margin-top:0}
+  .pop p{font-size:12.5px;color:#3d3a33;line-height:1.55}
+  .pop ul{margin:4px 0 0 0;padding-left:16px}
+  .pop li{font-size:12.5px;color:#3d3a33;line-height:1.55;margin-bottom:4px}
+  .pop .facts{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:4px}
+  .pop .facts div{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;gap:8px;border-bottom:1px dotted var(--line);padding-bottom:3px}
+  .pop .facts b{color:var(--ink);font-weight:600}
+
+  .health{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .hc{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;border-left:4px solid var(--muted)}
+  .hc.h5{border-left-color:#1a7a4a} .hc.h4{border-left-color:#4a9e6b} .hc.h3{border-left-color:var(--amber)}
+  .hc.h2{border-left-color:#d1622f} .hc.h1{border-left-color:var(--neg)} .hc.hx{border-left-color:#b9b2a4}
+  .hc .n{font-family:'Fraunces',serif;font-weight:600;font-size:30px}
+  .hc .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .hc .p{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .callout{background:var(--accent-soft);border:1px solid #cfe4df;border-radius:6px;padding:16px 18px;font-size:13.5px;color:#1c3a37;margin-top:14px}
+  .callout strong{color:var(--accent)}
+  .note-box{background:#fbf6ec;border:1px solid #eaddc2;border-radius:6px;padding:13px 16px;font-size:12.5px;color:#6a5a38;margin-top:14px}
+
+  /* clickable rows */
+  tr.clk{cursor:pointer}
+  tr.clk:hover td{background:#f4efe6}
+  .cbtn{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;border-radius:20px;padding:3px 8px;white-space:nowrap;border:1px solid var(--line);color:var(--muted);background:#faf8f3}
+  .cbtn.on{color:var(--accent);background:var(--accent-soft);border-color:#cfe4df}
+  td.act{text-align:right;width:1%}
+
+  /* dropdown */
+  .dd{background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .dd summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;gap:10px;background:#faf8f3;font-size:13.5px;font-weight:600}
+  .dd summary::-webkit-details-marker{display:none}
+  .dd summary::before{content:"▸";font-size:11px;color:var(--amber);transition:transform .15s ease;display:inline-block}
+  .dd[open] summary::before{transform:rotate(90deg)}
+  .dd[open] summary{border-bottom:1px solid var(--line)}
+  .dd summary:hover{background:#f4efe6}
+  .dd .dd-h{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .dd[open] .dd-h::after{content:" — collapse"}
+  .dd-body{max-height:420px;overflow:auto}
+  .dd-body .tbl{border:none;border-radius:0}
+  .dd-body .tbl th{position:sticky;top:0;z-index:2}
+
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(20,24,31,.5);display:none;align-items:center;justify-content:center;padding:24px;z-index:100}
+  .ov.open{display:flex}
+  .mdl{background:var(--card);border-radius:10px;max-width:660px;width:100%;max-height:85vh;overflow:auto;padding:26px 28px;box-shadow:0 30px 70px rgba(0,0,0,.3)}
+  .mdl-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+  .mdl-name{font-family:'Fraunces',serif;font-weight:600;font-size:24px;line-height:1.15}
+  .mdl-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+  .x{background:none;border:1px solid var(--line);border-radius:6px;width:30px;height:30px;font-size:16px;line-height:1;cursor:pointer;color:var(--muted);flex:none}
+  .x:hover{background:#f4efe6}
+  .mdl h4{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:18px 0 7px}
+  .mdl h4:first-of-type{margin-top:0}
+  .mdl p,.mdl li{font-size:13.5px;color:#3d3a33;line-height:1.6}
+  .mdl ul{padding-left:18px}
+  .mdl li{margin-bottom:6px}
+  .tl{list-style:none;padding:0}
+  .tl li{position:relative;padding-left:16px;border-left:2px solid var(--line);margin-left:4px;padding-bottom:12px;margin-bottom:0}
+  .tl li:last-child{padding-bottom:0}
+  .tl li::before{content:"";position:absolute;left:-5px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .tl .d{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;display:block;margin-bottom:2px}
+
+  ol.steps{list-style:none;counter-reset:s;margin-top:6px}
+  ol.steps li{counter-increment:s;position:relative;padding:14px 0 14px 44px;border-bottom:1px solid var(--line)}
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:14px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);font-weight:600}
+  ol.steps b{font-weight:600}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  .meet{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .mc{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;border-top:3px solid var(--accent)}
+  .mc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .mc-name{font-family:'Fraunces',serif;font-weight:600;font-size:18px}
+  .mc p{font-size:13px;color:#3d3a33;line-height:1.5}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+  .tag-pos{background:var(--accent-soft);color:var(--accent)}
+  .tag-warn{background:#f7ecd6;color:var(--amber)}
+  @media(max-width:960px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2,.cols{grid-template-columns:1fr}.health{grid-template-columns:repeat(2,1fr)}.tbl{font-size:13px}.tbl th,.tbl td{padding:9px 10px}.pop{width:min(440px,calc(100vw - 56px))}}
+  @media print{.dd-body{max-height:none;overflow:visible}.dd summary .dd-h{display:none}body{background:#fff}.mv,.hc,.kpi,.tbl{break-inside:avoid}.pop,.ov{display:none!important}.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}.cols .tbl{font-size:12px}.cols .tbl th,.cols .tbl td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Customer Success · Weekly Governance</div>
+    <h1>CSM Report</h1>
+    <p class="sub">Revenue, account health and QBR coverage across the portfolio for leadership review. Hover the <em>Summary</em> chips and click any flagged account for CSM commentary.</p>
+    <div class="period">Aug W4 · 24 – 31 Aug 2026</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">2026 YTD Net Rev</div><div class="val">$3.70M</div><div class="note">160 accounts</div></div>
+    <div class="kpi"><div class="label">YTD Growth</div><div class="val up">+48.5%</div><div class="note">vs $2.49M in 2025</div></div>
+    <div class="kpi"><div class="label">QBRs — YTD</div><div class="val">270</div><div class="note">completed in 2026</div></div>
+    <div class="kpi"><div class="label">QBRs — MTD</div><div class="val">45</div><div class="note">August 2026</div></div>
+    <div class="kpi"><div class="label">QBRs — This Week</div><div class="val">6</div><div class="note">Aug W4</div></div>
+  </div>
+  <div class="callout"><strong>Summary.</strong> 2026 YTD net revenue of <strong>$3.70M</strong> is up <strong>48.5%</strong> on 2025. QBR cadence is holding — <strong>270 QBRs YTD</strong>, <strong>45 in August</strong> and <strong>6 this week</strong>. 75% of the portfolio sits in the Healthy or Happy tiers; 7 billing accounts remain At Risk with active recovery plans.</div>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Account overview by CSM</h2><span class="hint">2025 vs 2026 YTD net revenue billed</span></div>
+    <table class="tbl">
+      <thead><tr><th>CSM</th><th class="num">Accounts</th><th class="num">2025 YTD</th><th class="num">2026 YTD</th><th class="num">Growth</th></tr></thead>
+      <tbody>
+<tr><td class="name">Sonal Agarwal</td><td class="num">33</td><td class="num">$1,232,038</td><td class="num">$2,144,527</td><td class="num pos">+74.1%</td></tr>
+<tr><td class="name">Pavan G D</td><td class="num">17</td><td class="num">$476,445</td><td class="num">$498,940</td><td class="num pos">+4.7%</td></tr>
+<tr><td class="name">Sanskruti Tanaya</td><td class="num">22</td><td class="num">$119,713</td><td class="num">$201,130</td><td class="num pos">+68.0%</td></tr>
+<tr><td class="name">Benin J Castro</td><td class="num">25</td><td class="num">$122,999</td><td class="num">$200,238</td><td class="num pos">+62.8%</td></tr>
+<tr><td class="name">Manoj Kumar</td><td class="num">19</td><td class="num">$119,265</td><td class="num">$168,796</td><td class="num pos">+41.5%</td></tr>
+<tr><td class="name">Debosmita Paul</td><td class="num">17</td><td class="num">$113,751</td><td class="num">$148,090</td><td class="num pos">+30.2%</td></tr>
+<tr><td class="name">Shilpa G</td><td class="num">16</td><td class="num">$104,296</td><td class="num">$142,206</td><td class="num pos">+36.3%</td></tr>
+<tr><td class="name">Ada Sodhi</td><td class="num">7</td><td class="num">$121,906</td><td class="num">$124,644</td><td class="num pos">+2.2%</td></tr>
+<tr><td class="name">Anandh Kumar</td><td class="num">3</td><td class="num">$72,860</td><td class="num">$60,359</td><td class="num neg">−17.2%</td></tr>
+<tr><td class="name">KAILASH JOSHI</td><td class="num">1</td><td class="num">$8,654</td><td class="num">$11,800</td><td class="num pos">+36.4%</td></tr>
+<tr class="total"><td>Total</td><td class="num">160</td><td class="num">$2,491,926</td><td class="num">$3,700,731</td><td class="num pos">+48.5%</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>Top movers — YTD</h2><span class="hint">Largest growth &amp; degrowth accounts<br>hover <em>Summary</em> for detail</span></div>
+    <div class="grid2">
+      <div>
+        <div class="col-head g">▲ Growth</div>
+        <div class="mv"><div class="top"><span class="acct">Awardco</span><span class="pct pos">+469%</span></div><div class="amt">+$553,930</div></div>
+        <div class="mv"><div class="top"><span class="acct">Philip Morris Indonesia</span><span class="pct pos">+100%</span></div><div class="amt">+$118,528</div></div>
+        <div class="mv"><div class="top"><span class="acct">Achievers</span><span class="pct pos">+114%</span></div><div class="amt">+$105,969</div></div>
+        <div class="mv"><div class="top"><span class="acct">Mercedes-Benz India</span><span class="pct pos">+130%</span></div><div class="amt">+$73,597</div></div>
+        <div class="mv"><div class="top"><span class="acct">Tremendous</span><span class="pct pos">+165%</span></div><div class="amt">+$70,484</div></div>
+      </div>
+      <div>
+        <div class="col-head d">▼ Degrowth</div>
+
+        <div class="mv">
+          <div class="top"><span class="acct">Sutherland</span><span class="pct neg">−86%</span></div>
+          <div class="amt">−$66,871</div>
+          <div class="sumwrap"><span class="sum-chip" tabindex="0">Summary</span>
+            <div class="pop">
+              <h4>Account snapshot</h4>
+              <div class="facts">
+                <div>Total GMV <b>₹2,60,33,222</b></div>
+                <div>Margin <b>5.52%</b></div>
+                <div>SaaS revenue <b>₹47,688</b></div>
+                <div>Net revenue <b>₹79,946</b></div>
+                <div>Rewards issued <b>₹23,63,248</b></div>
+                <div>Redeemed <b>₹5,74,048</b></div>
+                <div>First recharge <b>Nov 2023</b></div>
+                <div>Last recharge <b>Apr 2026</b></div>
+              </div>
+              <h4>Health snapshot</h4>
+              <p>Account has scaled well (₹2.6 Cr GMV since Nov 2023), with consistent recharges indicating active usage. However, redemption utilisation is low (~24% of rewards issued), signalling an engagement or awareness gap. Revenue margin remains modest at 5.52% — upsell and activation opportunities exist.</p>
+              <h4>Support snapshot</h4>
+              <p>30 tickets total · 28 resolved within SLA (93%) · 2 SLA breaches. Top issues: voucher PIN/code failures, order delays, low balance alerts. 25 of 30 tickets were auto-generated notifications — actual human issues are minimal. Volume peaked in Q3 (Oct–Dec) with a slight decline in Q4 (Dec–Feb); support health is stable.</p>
+              <h4>Next steps</h4>
+              <ul><li>Explore upsell given the account's strong GMV base.</li><li>Drive redemption/activation campaigns to close the utilisation gap.</li></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="mv">
+          <div class="top"><span class="acct">Flipkart</span><span class="pct neg">−31%</span></div>
+          <div class="amt">−$52,295</div>
+          <div class="sumwrap"><span class="sum-chip" tabindex="0">Summary</span>
+            <div class="pop">
+              <h4>Position</h4>
+              <p>Billing-related and ongoing commercial discussions; no account-level risk. The gap is expected to recover as planned business comes through.</p>
+              <h4>Client feedback</h4>
+              <p>Overall the client is happy with the programme. They would like a monthly report on usage across their workforce — this needs to be discussed with the Practo team to offer it on a monthly basis.</p>
+              <h4>Commercials</h4>
+              <p><b>5 July</b> — PO received; invoice submitted in their portal.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mv">
+          <div class="top"><span class="acct">Infosys Limited</span><span class="pct neg">−28%</span></div>
+          <div class="amt">−$30,715</div>
+          <div class="sumwrap"><span class="sum-chip" tabindex="0">Summary</span>
+            <div class="pop">
+              <h4>Position</h4>
+              <p>Higher 2025 base from a one-time ad-hoc rewards activity. Core business stable; no underlying degrowth.</p>
+              <h4>Live opportunity — R&amp;R rollout</h4>
+              <p>Strong interest from Infosys in quickly rolling out a Rewards &amp; Recognition platform, with focus on award structure, eligibility, allocation and technical feasibility.</p>
+              <ul>
+                <li><b>Recognition structure:</b> Kudos &amp; Spot Awards monthly; Achievers quarterly, with a separate Team Award category.</li>
+                <li><b>Kudos:</b> up to 15% of headcount nominated monthly, one-level approval, self-nomination enabled.</li>
+                <li><b>Achievers:</b> allocation capped at 10% of annual headcount, slots distributed proportionally across Delivery Managers within each unit.</li>
+                <li><b>Implementation:</b> Infosys wants to move quickly while evaluating DPO/data-processing requirements and whether HO is in scope.</li>
+                <li><b>Technical feasibility:</b> API/VPN access requirements to be assessed based on limited access in a previous similar implementation.</li>
+                <li><b>Ownership:</b> Madhu is now POC for certificates/HR coordination, taking over from Mahalakshmi.</li>
+              </ul>
+              <h4>Next step</h4>
+              <p>Infosys is in active evaluation/implementation rather than early discovery. Priority is a tailored platform demo (Nat Singh / CHRO expected to join), addressing DPO/API/VPN feasibility and aligning senior HR to accelerate rollout.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Account health</h2><span class="hint">160 accounts scored</span></div>
+    <div class="health">
+      <div class="hc h5"><div class="n">43</div><div class="l">Healthy &amp; Expanding</div><div class="p">26.9%</div></div>
+      <div class="hc h4"><div class="n">77</div><div class="l">Happy</div><div class="p">48.1%</div></div>
+      <div class="hc h3"><div class="n">25</div><div class="l">Needs Improvement</div><div class="p">15.6%</div></div>
+      <div class="hc h2"><div class="n">6</div><div class="l">At Risk</div><div class="p">3.8%</div></div>
+      <div class="hc h1"><div class="n">1</div><div class="l">Termination / Churn</div><div class="p">0.6%</div></div>
+      <div class="hc hx"><div class="n">7</div><div class="l">Not Live</div><div class="p">4.4%</div></div>
+      <div class="hc hx"><div class="n">1</div><div class="l">Status Unknown</div><div class="p">0.6%</div></div>
+      <div class="hc h5"><div class="n">75%</div><div class="l">Healthy or Happy</div><div class="p">tiers 4 &amp; 5</div></div>
+    </div>
+
+    <div class="note-box">Expand the Needs Improvement list to see all 25 billing accounts. In the At Risk table, click any row to read the CSM commentary — why it is flagged, what has been done and what happens next.</div>
+
+    <div class="cols" style="margin-top:20px">
+      <div>
+        <div class="col-head" style="color:var(--amber)">Needs Improvement — billing accounts</div>
+        <details class="dd">
+          <summary><span class="dd-t">25 accounts</span><span class="dd-h">click to expand</span></summary>
+          <div class="dd-body">
+            <table class="tbl" id="ni">
+              <thead><tr><th>Account</th><th>CSM</th></tr></thead>
+              <tbody>
+                <tr><td class="name">360 ONE</td><td>Pavan G D</td></tr>
+                <tr><td class="name">360Insights</td><td>Sonal Agarwal</td></tr>
+                <tr><td class="name">Aavas Financiers Ltd</td><td>Sanskruti Tanaya</td></tr>
+                <tr><td class="name">Adobe</td><td>Pavan G D</td></tr>
+                <tr><td class="name">Bridgestone India Private Limited</td><td>Sonal Agarwal</td></tr>
+                <tr><td class="name">Consero Global</td><td>Debosmita Paul</td></tr>
+                <tr><td class="name">Continental</td><td>Manoj Kumar</td></tr>
+                <tr><td class="name">COSENTINO</td><td>Sonal Agarwal</td></tr>
+                <tr><td class="name">Deem Finance</td><td>Debosmita Paul</td></tr>
+                <tr><td class="name">Equitas Small Finance Bank</td><td>Sanskruti Tanaya</td></tr>
+                <tr><td class="name">Godrej</td><td>Sonal Agarwal</td></tr>
+                <tr><td class="name">InsuranceDekho</td><td>Benin J Castro</td></tr>
+                <tr><td class="name">Jaguar Land Rover</td><td>Debosmita Paul</td></tr>
+                <tr><td class="name">Maya Bank</td><td>Sonal Agarwal</td></tr>
+                <tr><td class="name">MCKINSEY GLOBAL SERVICES INDIA PVT LTD</td><td>Benin J Castro</td></tr>
+                <tr><td class="name">Meesho.com</td><td>Manoj Kumar</td></tr>
+                <tr><td class="name">Myntra</td><td>Manoj Kumar</td></tr>
+                <tr><td class="name">Navi Technologies</td><td>Sanskruti Tanaya</td></tr>
+                <tr><td class="name">Omega Health care</td><td>Sanskruti Tanaya</td></tr>
+                <tr><td class="name">PW (PhysicsWallah)</td><td>Benin J Castro</td></tr>
+                <tr><td class="name">RBL Bank</td><td>Sanskruti Tanaya</td></tr>
+                <tr><td class="name">Spinny</td><td>Shilpa G</td></tr>
+                <tr><td class="name">TerraPay</td><td>Benin J Castro</td></tr>
+                <tr><td class="name">Whatfix</td><td>Benin J Castro</td></tr>
+                <tr><td class="name">Zydus Wellness Products Limited</td><td>Debosmita Paul</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+      <div>
+        <div class="col-head d">At Risk — billing accounts</div>
+        <table class="tbl" id="ar">
+          <thead><tr><th>Account</th><th>CSM</th><th class="act">Notes</th></tr></thead>
+          <tbody>
+            <tr class="clk" data-acct="achievers"><td class="name">Achievers</td><td>Sonal Agarwal</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="carrefour"><td class="name">Carrefour</td><td>Ada Sodhi</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="crossworld"><td class="name">Crossworld Marine</td><td>Ada Sodhi</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="growman"><td class="name">Growman Research and Consulting Pvt. Ltd</td><td>Sonal Agarwal</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="livspace"><td class="name">Livspace</td><td>KAILASH JOSHI</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="tahweel"><td class="name">Tahweel</td><td>Sonal Agarwal</td><td class="act"><span class="cbtn on">view</span></td></tr>
+            <tr class="clk" data-acct="taskus"><td class="name">TaskUS</td><td>Shilpa G</td><td class="act"><span class="cbtn on">view</span></td></tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top:14px"><strong>Themes across At Risk.</strong> Two clusters dominate: <strong>operational errors</strong> (funds, denomination and stock failures driving cancellations and support volume — Achievers, Growman, Tahweel) and <strong>engagement / budget stalls</strong> (POC changes, lay-offs and dormant renewals — Livspace, TaskUS, Carrefour, Crossworld Marine).</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Key next steps</h2></div>
+    <ol class="steps">
+      <li><b>Error-driven risk.</b> Execute the monitoring and hypercare plans on Achievers, Growman and Tahweel — proactive funds checks, pending-order monitoring and category/vendor escalation on the JOD corridor.</li>
+      <li><b>Re-engagement push.</b> Reconnect the dormant accounts — Carrefour (renewal due, invoice raised), TaskUS (Global Rewards Head via KAM), Crossworld Marine (best-practice handholding on Empuls and Plum) and Livspace (post-F2F follow-up on ownership and voucher pricing).</li>
+      <li><b>Sutherland activation.</b> Close the redemption utilisation gap (~24% of rewards issued) and pursue upsell against the ₹2.6 Cr GMV base.</li>
+      <li><b>Infosys rollout.</b> Deliver the tailored demo with CHRO participation and clear DPO / API / VPN feasibility to convert the active evaluation.</li>
+      <li><b>Account health.</b> Drive defined action plans for the 25 Needs Improvement and 7 At Risk billing accounts, with CSM commentary logged weekly for every flagged account.</li>
+      <li><b>Weekly governance.</b> Continue tracking revenue, health and QBR cadence — 270 YTD, 45 MTD, 6 this week — with clear ownership and escalation past agreed timelines.</li>
+    </ol>
+  </section>
+
+  <footer>Customer Success Weekly Report · Aug W4 (24–31 Aug 2026) · Prepared for leadership review. Revenue = YTD net revenue billed.</footer>
+</div>
+
+<div class="ov" id="ov">
+  <div class="mdl" role="dialog" aria-modal="true">
+    <div class="mdl-top">
+      <div><div class="mdl-name" id="mn"></div><div class="mdl-meta" id="mm"></div></div>
+      <button class="x" id="xb" aria-label="Close">×</button>
+    </div>
+    <div id="mb"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  achievers: {name:"Achievers", meta:"At Risk · Sonal Agarwal", body:`
+    <h4>Why flagged</h4>
+    <p>Fill rate needs improvement and partial cancellations must come down. Pending orders are monitored daily to reduce cancellations.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">15 July</span>Thorough analysis completed on cancelled orders. The client's main concern was partially cancelled orders — volumes are low, under 1%. Client informed; relationship stable.</li>
+      <li><span class="d">7 August</span>Client escalated high support volumes at their end — around 1,200 cases in July — caused by repetitive errors on our side (funds, denomination, stock issues). A thorough analysis was completed and a monitoring plan shared with the client to control the errors.</li>
+    </ul>
+    <h4>Next steps</h4>
+    <ul><li>Execute the shared monitoring plan and report error reduction back to the client.</li><li>Continue daily pending-order monitoring to hold cancellations under 1%.</li></ul>`},
+
+  carrefour: {name:"Carrefour", meta:"At Risk · Ada Sodhi", body:`
+    <h4>Why flagged</h4>
+    <p>Status marked 2 — no engagement in the last six months and renewal due in July. Account reassigned to the current CSM in June 2026.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">December 2025</span>Sonal last connected with the client. Multiple non-monetary awards were created at that time; no budget was available for monetary awards. Some discussion around 2026 budget allocation.</li>
+      <li><span class="d">June 2026</span>Account assigned to Ada. Client has gone live with 342 users. Plan to connect with Upasna to understand what is live today, who is actively using it, what has changed since the last discussion, and whether a monetary awards budget is now available. Success metrics to validate: active users, award usage/adoption, engagement across locations, and any survey/wellness priorities for 2026.</li>
+      <li><span class="d">30 August 2026</span>Annual SaaS invoice already raised; another follow-up email sent today to re-establish communication.</li>
+    </ul>
+    <h4>Next steps</h4>
+    <p>Continue focused follow-ups to reconnect with stakeholders, understand current usage and priorities, and rebuild regular engagement with the account.</p>`},
+
+  crossworld: {name:"Crossworld Marine", meta:"At Risk · Ada Sodhi", body:`
+    <h4>Why flagged</h4>
+    <p>Marked 2 because adoption is weak, despite three-plus years on the platform. The client is also not keen on meetings.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">May 2026</span>Kim connected with the new HR representative and provided a detailed platform walkthrough.</li>
+      <li><span class="d">Current</span>Client is also using Plum, primarily for discounted vouchers for seafarers.</li>
+    </ul>
+    <h4>Next steps</h4>
+    <ul><li>Take the client through best practices for using Empuls, handhold and guide them on Plum.</li><li>Use Kim's relationship (she met them in May) to get a meeting fixed.</li></ul>`},
+
+  growman: {name:"Growman Research and Consulting Pvt. Ltd", meta:"At Risk · Sonal Agarwal", body:`
+    <h4>Why flagged</h4>
+    <p>Major escalations caused by errors from funds issues.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">Ongoing</span>Proactive checks on funds issues are in place. Finance has been informed and projections have been given. Proactive checks also running on CS tickets.</li>
+      <li><span class="d">14 August</span>Client at risk due to repetitive errors from funds issues. Hypercare plan in place on pending orders.</li>
+    </ul>
+    <h4>Next steps</h4>
+    <ul><li>Sustain the hypercare plan on pending orders until error rates normalise.</li><li>Keep finance aligned on funds projections to prevent recurrence.</li></ul>`},
+
+  livspace: {name:"Livspace", meta:"At Risk · Kailash Joshi", body:`
+    <h4>Why flagged</h4>
+    <p>Major lay-offs, no new incentive plans being added to the platform, delays in payments, and a change of POC.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">Earlier</span>Kailash shared a deck with Abhinav covering key metrics; team was pushing for a face-to-face meeting with the customer.</li>
+      <li><span class="d">4 August 2026</span>Face-to-face meeting held at the customer's office.</li>
+    </ul>
+    <h4>Agreed actions from the 4 August meeting</h4>
+    <ul>
+      <li><b>Livspace</b> — discuss Compass platform status and engagement data with internal business and tech stakeholders · by 10 Aug 2026</li>
+      <li><b>Livspace</b> — revert with an update on internal discussions and identify who will own the implementation · by 10 Aug 2026</li>
+      <li><b>Xoxoday</b> — send a separate email requesting voucher/gifting requirements (current pricing, brands needed, annual value, expectations) · immediately after the call</li>
+      <li><b>Livspace</b> — share annual voucher requirement details including the last two years' spending data · no deadline set</li>
+      <li><b>Xoxoday</b> — provide a competitive voucher pricing proposal based on the shared requirements · after receiving details</li>
+      <li><b>Both parties</b> — set up a follow-up call or in-person meeting at the Livspace office · week of 10 Aug 2026</li>
+    </ul>`},
+
+  tahweel: {name:"Tahweel", meta:"At Risk · Sonal Agarwal", body:`
+    <h4>Overall performance</h4>
+    <div style="font-size:13px;color:#3d3a33">7,014 orders · 4,246 successful · 2,768 failed · GMV $59,920 · <b>fulfilment 60.5%</b> against a 75%+ target.</div>
+    <h4>Month on month</h4>
+    <ul>
+      <li>Feb 2026 (partial) — 249 orders, $2,526 GMV, 58.6% fulfilment</li>
+      <li>Mar 2026 — 1,315 orders, $30,036 GMV, 71.5% fulfilment (best month)</li>
+      <li>Apr 2026 — 2,730 orders, $13,139 GMV, 54.8% fulfilment (worst month)</li>
+      <li>May 2026 — 2,671 orders, $14,220 GMV, 62.3% fulfilment (recovering)</li>
+    </ul>
+    <h4>Mobile top-up vs gift card</h4>
+    <ul>
+      <li>Mobile top-up — 4,038 orders (95.1%), GMV $38,152 (63.7%), avg order $9.45</li>
+      <li>Gift card — 208 orders (4.9%), GMV $21,768 (36.3%), avg order $104.66</li>
+    </ul>
+    <h4>Failure breakdown — 2,768 total</h4>
+    <ul>
+      <li>Stock issue / upstream error — 2,046 (73.9%) · MTU 2,037 | GC 9</li>
+      <li>Balance error — 608 (22.0%) · MTU 590 | GC 18</li>
+      <li>Mapping / config issue — 81 (2.9%) · MTU 57 | GC 24</li>
+      <li>Product unavailable — 24 (0.9%) · MTU only</li>
+      <li>Other — 9 (0.3%)</li>
+      <li>MTU failures 2,712 (97.9% of all failures) · GC failures 56 (2.1%)</li>
+    </ul>
+    <h4>Top 5 failed products — all mobile top-up, Jordan corridor</h4>
+    <ul><li>8 JOD PIN — 417 failures</li><li>11 JOD PIN — 348</li><li>1 Umniah PIN Jordan — 304</li><li>1 JOD PIN — 256</li><li>13 JOD PIN — 163</li></ul>
+    <h4>Top 5 products by GMV</h4>
+    <ul>
+      <li>HappyYOU Card Saudi Arabia (GC) — 20 orders, $10,532, 17.6% share</li>
+      <li>Alfa Lebanon USD (MTU) — 81 orders, $6,260, 10.4%</li>
+      <li>Razer Gold USD (GC) — 29 orders, $4,474, 7.5%</li>
+      <li>Noon (GC) — 12 orders, $4,374, 7.3%</li>
+      <li>11 JOD PIN (MTU) — 234 orders, $3,630, 6.1%</li>
+    </ul>
+    <h4>Open actions &amp; CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">Open · JOD errors</span>Under evaluation with the vendor. Vendor states it is an operator stability issue; highlighted to the category team, but no concrete update from the vendor. High failure rate put the client at risk.</li>
+      <li><span class="d">19 June</span>Order failures under control — moved from At Risk to Needs Improvement at the time; recharges were frequent.</li>
+      <li><span class="d">22 June</span>Price changes due to forex on mobile top-ups; client unhappy and looking to move to DTOne. Category team evaluating vendor price changes.</li>
+      <li><span class="d">15 July</span>Client expressed pricing concerns on Jordan mobile top-up but gained confidence on gift cards. Client looking to run a campaign for their first anniversary; pricing details to be shared by Yuvaraj. Strategy is to retain the client via gift cards.</li>
+      <li><span class="d">11 August</span>No recharge since August, balance down to $1. Client not willing to continue due to repetitive price changes on mobile top-up.</li>
+    </ul>`},
+
+  taskus: {name:"TaskUS", meta:"At Risk · Shilpa G", body:`
+    <h4>Why flagged</h4>
+    <p>Management changes and budget pressure led to a planned stop on Empuls and Plum; engagement is limited to issue-related queries.</p>
+    <h4>CSM commentary</h4>
+    <ul class="tl">
+      <li><span class="d">May 2026</span>QBR deck with analysis shared with the customer; they were not responding to calls. Customer using Empuls for non-monetary recognition and Plum for voucher distribution. Contact maintained but responses limited to issue-related queries. Communicated to the KAM — based on the update at that point, they were planning to stop services.</li>
+      <li><span class="d">June 2026 · week 1</span>Significant management changes and a plan to move to physical gifting due to budget issues, with the intent to stop using Empuls and Plum. KAM met the Global Rewards Head (Amey) to re-initiate rewarding.</li>
+      <li><span class="d">22 June 2026</span>Based on the KAM discussion, they are planning to resume on Empuls; call with the new Global Rewards Head planned for the following week.</li>
+      <li><span class="d">July 2026</span>CSM following up with the KAM team to connect with Amey, Global Rewards Head, on resuming the Rewards &amp; Recognition programme on Empuls.</li>
+    </ul>
+    <h4>Next steps</h4>
+    <ul><li>Secure the discussion with Amey via KAM and convert the intent to resume into a live plan.</li></ul>`}
+};
+
+const ov=document.getElementById('ov');
+const openM=k=>{const d=DATA[k];if(!d)return;document.getElementById('mn').textContent=d.name;document.getElementById('mm').textContent=d.meta;document.getElementById('mb').innerHTML=d.body;ov.classList.add('open');};
+const closeM=()=>ov.classList.remove('open');
+document.querySelectorAll('tr.clk').forEach(r=>r.addEventListener('click',()=>openM(r.dataset.acct)));
+document.getElementById('xb').addEventListener('click',closeM);
+ov.addEventListener('click',e=>{if(e.target===ov)closeM();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+window.addEventListener('beforeprint',()=>document.querySelectorAll('details.dd').forEach(d=>d.open=true));
+</script>
+</body>
+</html>
